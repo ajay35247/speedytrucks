@@ -1,0 +1,21 @@
+{
+  "name": "speedytrucks-platform",
+  "version": "2.0.0",
+  "description": "SpeedyTrucks — India's Full-Stack Freight Marketplace Platform",
+  "private": true,
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build:frontend": "cd frontend && npm run build",
+    "deploy": "docker-compose up --build -d",
+    "deploy:down": "docker-compose down",
+    "deploy:logs": "docker-compose logs -f",
+    "deploy:restart": "docker-compose restart",
+    "db:seed": "cd backend && node src/scripts/seed.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
