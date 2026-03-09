@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- ✅ Primary SEO -->
+    <title>APTrucking - India's #1 Truck &amp; Freight Marketplace | Book Trucks Online</title>
+    <meta name="description" content="APTrucking is India's leading freight marketplace. Post loads, find trucks, track shipments live. Connecting shippers with 10,000+ truck owners across India." />
+    <meta name="keywords" content="truck booking India, freight marketplace India, load posting, truck rental, logistics India, transport booking, goods transport, APTrucking" />
+    <meta name="author" content="APTrucking" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#1660F5" />
+
+    <!-- ✅ Canonical -->
+    <link rel="canonical" href="https://www.aptrucking.in/" />
+
+    <!-- ✅ Open Graph (WhatsApp / Facebook) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.aptrucking.in/" />
+    <meta property="og:title" content="APTrucking - India's #1 Truck &amp; Freight Marketplace" />
+    <meta property="og:description" content="Post loads, find trucks, track shipments live. India's leading freight marketplace connecting shippers with verified truck owners." />
+    <meta property="og:image" content="https://www.aptrucking.in/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_IN" />
+    <meta property="og:site_name" content="APTrucking" />
+
+    <!-- ✅ Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="APTrucking - India's #1 Freight Marketplace" />
+    <meta name="twitter:description" content="Post loads, find trucks, track shipments live across India." />
+    <meta name="twitter:image" content="https://www.aptrucking.in/og-image.png" />
+
+    <!-- ✅ Geographic -->
+    <meta name="geo.region" content="IN" />
+    <meta name="geo.country" content="India" />
+
+    <!-- ✅ PWA & Icons -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" href="/icons/icon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/icons/icon-16x16.png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="APTrucking" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- ✅ Preconnect to backend for faster API -->
+    <link rel="preconnect" href="https://speedytrucks-production.up.railway.app" />
+    <link rel="dns-prefetch" href="https://speedytrucks-production.up.railway.app" />
+
+    <!-- ✅ Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "APTrucking",
+      "url": "https://www.aptrucking.in",
+      "logo": "https://www.aptrucking.in/icons/icon-192x192.png",
+      "description": "India's #1 Truck & Freight Marketplace",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "IN"
+      },
+      "sameAs": [
+        "https://www.aptrucking.in"
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "url": "https://www.aptrucking.in",
+      "name": "APTrucking",
+      "description": "India's #1 Truck & Freight Marketplace",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.aptrucking.in/marketplace?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- ✅ Critical inline CSS to prevent blank page flash -->
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { height: 100%; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #050D1F;
+        color: #ffffff;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+      }
+      #root { min-height: 100vh; display: flex; flex-direction: column; }
+      /* Loading spinner shown before React mounts */
+      #initial-loader {
+        position: fixed; inset: 0;
+        background: #050D1F;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.3s ease;
+      }
+      #initial-loader.hidden { opacity: 0; pointer-events: none; }
+      .loader-truck { font-size: 64px; margin-bottom: 20px; animation: bounce 1s infinite; }
+      .loader-title { color: #fff; font-size: 28px; font-weight: bold; margin-bottom: 8px; }
+      .loader-sub { color: #888; font-size: 14px; margin-bottom: 32px; }
+      .loader-bar { width: 200px; height: 4px; background: #1a3060; border-radius: 2px; overflow: hidden; }
+      .loader-fill { height: 100%; background: #1660F5; border-radius: 2px; animation: loading 1.5s ease-in-out infinite; }
+      @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+      @keyframes loading { 0%{width:0%;margin-left:0} 50%{width:70%;margin-left:0} 100%{width:100%;margin-left:0} }
+      /* Scrollbar */
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: #0B1A35; }
+      ::-webkit-scrollbar-thumb { background: #1660F5; border-radius: 3px; }
+    </style>
+  </head>
+
+  <body>
+    <!-- ✅ Accessible main landmark -->
+    <main id="root" role="main" aria-label="APTrucking Application">
+      <!-- Initial loader shown until React mounts -->
+      <div id="initial-loader" aria-hidden="true">
+        <div class="loader-truck" role="img" aria-label="Truck">🚛</div>
+        <div class="loader-title">APTrucking</div>
+        <div class="loader-sub">India's #1 Freight Marketplace</div>
+        <div class="loader-bar"><div class="loader-fill"></div></div>
+      </div>
+    </main>
+
+    <!-- ✅ Noscript fallback -->
+    <noscript>
+      <div style="background:#050D1F;color:#fff;text-align:center;padding:40px;font-family:sans-serif;">
+        <h1>🚛 APTrucking</h1>
+        <p style="margin-top:16px;color:#888;">Please enable JavaScript to use APTrucking — India's #1 Freight Marketplace.</p>
+        <p style="margin-top:8px;"><a href="https://www.enable-javascript.com/" style="color:#1660F5;">How to enable JavaScript →</a></p>
+      </div>
+    </noscript>
+
+    <!-- ✅ Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js')
+            .then(function(reg) { console.log('SW registered'); })
+            .catch(function(err) { console.log('SW failed:', err); });
+        });
+      }
+      // Hide loader once React mounts
+      window.__hideLoader = function() {
+        var loader = document.getElementById('initial-loader');
+        if (loader) {
+          loader.classList.add('hidden');
+          setTimeout(function() { loader.remove(); }, 400);
+        }
+      };
+    </script>
+
+    <!-- ✅ React App entry point -->
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

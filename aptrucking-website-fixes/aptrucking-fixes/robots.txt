@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Block admin from crawlers
+Disallow: /admin
+Disallow: /admin/
+
+# Sitemap
+Sitemap: https://www.aptrucking.in/sitemap.xml
