@@ -1,110 +1,79 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
-
-const API = import.meta.env.VITE_API_URL || 'https://speedytrucks-production.up.railway.app/api';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(() => localStorage.getItem('token'));
-  const [loading, setLoading] = useState(true); // loading = checking if already logged in
+  const [user, setUser]       = useState(null);
+  const [token, setToken]     = useState(() => localStorage.getItem('token'));
+  const [loading, setLoading] = useState(true);
 
-  // On app start: check if token is still valid
   useEffect(() => {
-    const init = async () => {
-      const savedToken = localStorage.getItem('token');
-      if (!savedToken) {
-        setLoading(false);
-        return;
-      }
+    const verify = async () => {
+      const t = localStorage.getItem('token');
+      if (!t) { setLoading(false); return; }
       try {
-        const res = await axios.get(`${API}/auth/profile`, {
-          headers: { Authorization: `Bearer ${savedToken}` },
-          timeout: 8000,
-        });
+        const res = await api.get('/auth/me');
         setUser(res.data.user);
-        setToken(savedToken);
-      } catch (err) {
-        // Token expired or invalid - clear it
-        console.log('[Auth] Token invalid, clearing...');
+      } catch {
         localStorage.removeItem('token');
-        setToken(null);
-        setUser(null);
+        localStorage.removeItem('user');
+        setToken(null); setUser(null);
       } finally {
         setLoading(false);
-        // Always hide the loading spinner
-        if (window.__hideLoader) window.__hideLoader();
       }
     };
-    init();
+    verify();
   }, []);
 
+  const _save = (tkn, usr) => {
+    localStorage.setItem('token', tkn);
+    localStorage.setItem('user', JSON.stringify(usr));
+    setToken(tkn); setUser(usr);
+  };
+
   const login = async (email, password) => {
-    const res = await axios.post(`${API}/auth/login`, { email, password });
-    const { token: newToken, user: newUser } = res.data;
-    localStorage.setItem('token', newToken);
-    setToken(newToken);
-    setUser(newUser);
-    return newUser;
+    const res = await api.post('/auth/login', { email, password });
+    _save(res.data.token, res.data.user);
+    return res.data.user;
   };
 
   const register = async (data) => {
-    const res = await axios.post(`${API}/auth/register`, data);
-    const { token: newToken, user: newUser } = res.data;
-    localStorage.setItem('token', newToken);
-    setToken(newToken);
-    setUser(newUser);
-    return newUser;
+    const res = await api.post('/auth/register', data);
+    _save(res.data.token, res.data.user);
+    return res.data.user;
   };
 
   const sendOTP = async (phone) => {
-    const res = await axios.post(`${API}/auth/send-otp`, { phone });
+    const res = await api.post('/auth/otp/request', { phone });
     return res.data;
   };
 
   const verifyOTP = async (phone, otp) => {
-    const res = await axios.post(`${API}/auth/verify-otp`, { phone, otp });
-    const { token: newToken, user: newUser } = res.data;
-    localStorage.setItem('token', newToken);
-    setToken(newToken);
-    setUser(newUser);
-    return newUser;
+    const res = await api.post('/auth/otp/verify', { phone, otp });
+    _save(res.data.token, res.data.user);
+    return res.data.user;
   };
 
-  // ✅ LOGOUT - clears everything
+  const forgotPassword = async (email) => {
+    const res = await api.post('/auth/forgot-password', { email });
+    return res.data;
+  };
+
+  const resetPassword = async (token, password) => {
+    const res = await api.post('/auth/reset-password', { token, password });
+    return res.data;
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    setToken(null);
-    setUser(null);
-    // Redirect to login
+    setToken(null); setUser(null);
     window.location.href = '/login';
   };
 
-  const refreshUser = async () => {
-    try {
-      const savedToken = localStorage.getItem('token');
-      const res = await axios.get(`${API}/auth/profile`, {
-        headers: { Authorization: `Bearer ${savedToken}` },
-      });
-      setUser(res.data.user);
-    } catch (err) {
-      console.error('[RefreshUser]', err.message);
-    }
-  };
-
-  // Axios default headers
-  useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-      delete axios.defaults.headers.common['Authorization'];
-    }
-  }, [token]);
-
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, sendOTP, verifyOTP, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, sendOTP, verifyOTP, forgotPassword, resetPassword, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -112,6 +81,6 @@ export function AuthProvider({ children }) {
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
+  if (!ctx) throw new Error('useAuth must be inside AuthProvider');
   return ctx;
 };
