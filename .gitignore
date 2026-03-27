@@ -1,7 +1,13 @@
 node_modules/
 dist/
+build/
+.expo/
+.expo-shared/
+android/
+ios/
+coverage/
+*.log
 .env
 .env.local
-*.log
+.env.production
 .DS_Store
-/tmp/uploads/
