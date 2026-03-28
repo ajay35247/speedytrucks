@@ -1,9 +1,0 @@
-[build]
-builder = "RAILPACK"
-buildCommand = "PRISMA_SKIP_POSTINSTALL_GENERATE=true NPM_CONFIG_REGISTRY=https://registry.npmjs.org npm ci && NPM_CONFIG_REGISTRY=https://registry.npmjs.org npx prisma generate && npm run build"
-watchPatterns = ["/backend/**"]
-
-[deploy]
-startCommand = "node dist/worker.js"
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
