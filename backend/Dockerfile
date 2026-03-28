@@ -2,9 +2,15 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Copy ONLY package files first
+COPY package.json package-lock.json ./
+
+# Now run npm ci (has lock file, no other files needed)
+RUN npm ci
+
+# Then copy the rest of your source code
 COPY . .
 
-RUN npm ci
 RUN npx prisma generate
 RUN npm run build
 
