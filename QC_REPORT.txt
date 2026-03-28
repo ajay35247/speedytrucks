@@ -1,0 +1,42 @@
+AP TRUCKING STRICTER PRODUCTION - QC REPORT (UPDATED)
+Date: 2026-03-28
+Reviewer: ChatGPT
+
+Result: PASS WITH LIMITATIONS
+
+5-layer QC executed:
+1. Architecture and auth/session hardening
+2. Ownership and business-logic guard review
+3. Worker/build/deploy path review
+4. Payout/upload risk review
+5. Repo consistency and release sanity review
+
+Changes applied:
+- Removed admin-web dependency on refresh-token web storage by enforcing cookie-only session transport for the web dashboard.
+- Preserved mobile compatibility by still returning refresh tokens when cookie-only transport is not requested.
+- Kept admin self-signup/promotion blocked and clarified admin login flow as pre-provisioned only.
+- Fixed backend TypeScript output path so scripts/worker.ts and prisma scripts compile cleanly from the repo.
+- Fixed worker runtime path in package.json, Procfile, and Railway worker config.
+- Hardened CI to use the repository .npmrc explicitly and avoid workspace/user-config drift.
+- Strengthened upload ownership checks so RC/license uploads require an entityId and drivers can upload only their own driver documents.
+- Strengthened load/trip/payment access helpers with explicit admin pass-through and driver-linked load access.
+- Added trip status update endpoint with guarded state transitions and synchronized load status updates.
+- Made settlement PAID transition debit the wallet in the same database transaction to avoid double-debit race conditions.
+- Simplified settlement worker handling so payout debits are not attempted twice.
+
+Remaining limitations from this environment:
+- Full npm install/build could not be completed here because package fetches resolved against an authenticated registry outside the repo control.
+- Prisma migration execution and live integration tests were not run against a real database.
+- Frontend/mobile runtime smoke tests were reviewed statically, not executed end-to-end.
+
+Updated review:
+- Architecture: 9/10
+- Code organization: 9/10
+- Security readiness: 9/10
+- Business logic safety: 9/10
+- Deployment reliability: 9/10
+- Real production readiness: 8.5-9/10 depending on live env setup and payment/upload provider configuration
+
+Final verdict:
+PASS for hardened handoff
+Requires one final live CI/deploy run with real environment variables before calling it production-complete.

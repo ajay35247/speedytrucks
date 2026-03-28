@@ -1,0 +1,30 @@
+{
+  "name": "ap-trucking-monorepo",
+  "private": true,
+  "version": "2.1.0",
+  "workspaces": [
+    "backend",
+    "frontend",
+    "mobile-app"
+  ],
+  "scripts": {
+    "install:backend": "npm --prefix backend ci --registry=https://registry.npmjs.org/ --workspaces=false",
+    "install:frontend": "npm --prefix frontend ci --registry=https://registry.npmjs.org/ --workspaces=false",
+    "install:mobile": "npm --prefix mobile-app ci --registry=https://registry.npmjs.org/ --workspaces=false",
+    "install:all": "npm run install:backend && npm run install:frontend && npm run install:mobile",
+    "build:backend": "npm --workspace backend run build",
+    "build:frontend": "npm --workspace frontend run build",
+    "typecheck:backend": "npm --workspace backend run typecheck",
+    "typecheck:mobile": "npm --workspace mobile-app run typecheck",
+    "build": "npm run build:backend && npm run build:frontend",
+    "ci:backend": "npm ci --prefix backend --workspaces=false --registry=https://registry.npmjs.org/",
+    "ci:frontend": "npm ci --prefix frontend --workspaces=false --registry=https://registry.npmjs.org/",
+    "ci:mobile": "npm ci --prefix mobile-app --workspaces=false --registry=https://registry.npmjs.org/",
+    "verify": "npm run typecheck:backend && npm run build:backend && npm run build:frontend && npm run typecheck:mobile"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "packageManager": "npm@10.9.2"
+}
