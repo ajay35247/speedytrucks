@@ -4,7 +4,10 @@ import { env } from '../config/env';
 import { ensureRedisConnected, redis } from '../lib/redis';
 import { logger } from '../lib/logger';
 
-type IncrementResult = {
+// Change:
+resetTime?: Date;
+// To:
+resetTime: Date;
   totalHits: number;
   resetTime: Date;
 };
