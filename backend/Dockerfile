@@ -2,14 +2,14 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma
-RUN npm ci
+RUN npm ci --include=dev
 
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/prisma ./prisma
 COPY . .
-RUN npx prisma generate && npm run build
+RUN npx prisma generate && npm run build && echo "Build OK" && ls dist/
 
 FROM node:20-alpine AS runtime
 WORKDIR /app
