@@ -1,0 +1,26 @@
+openapi: 3.0.3
+info:
+  title: AP Trucking API
+  version: 1.1.0
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+  /api/auth/send-otp:
+    post:
+      summary: Send OTP
+  /api/auth/verify-otp:
+    post:
+      summary: Verify OTP and login
+  /api/dashboard/summary:
+    get:
+      summary: Dashboard summary by role
+  /api/loads:
+    get:
+      summary: List loads
+  /api/trips:
+    get:
+      summary: List trips
