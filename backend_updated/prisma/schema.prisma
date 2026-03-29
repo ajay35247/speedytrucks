@@ -1,0 +1,324 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  SHIPPER
+  DRIVER
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum LoadStatus {
+  OPEN
+  ASSIGNED
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+}
+
+enum TripStatus {
+  ASSIGNED
+  AT_PICKUP
+  IN_TRANSIT
+  COMPLETED
+  CANCELLED
+}
+
+enum RefreshTokenStatus {
+  ACTIVE
+  ROTATED
+  REVOKED
+  EXPIRED
+}
+
+enum PaymentOrderStatus {
+  CREATED
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+}
+
+enum FraudSeverity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum UserSessionStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum WalletLedgerDirection {
+  CREDIT
+  DEBIT
+}
+
+model User {
+  id             String         @id @default(cuid())
+  name           String
+  mobile         String         @unique
+  email          String?        @unique
+  role           UserRole
+  status         UserStatus     @default(PENDING)
+  isKycVerified  Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  loads          Load[]         @relation("ShipperLoads")
+  trips          Trip[]         @relation("DriverTrips")
+  bankAccounts   BankAccount[]
+  refreshTokens  RefreshToken[]
+  settlements    Settlement[]
+  jobs           AppJob[]
+  fraudSignals   FraudSignal[]
+  sessions       UserSession[]
+  walletEntries  WalletLedger[]
+  paymentOrders  PaymentOrder[] @relation("PaymentOrderCreator")
+
+  @@index([role, status])
+}
+
+model UserSession {
+  id          String            @id @default(cuid())
+  userId       String
+  sessionId    String            @unique
+  status       UserSessionStatus @default(ACTIVE)
+  refreshTokenHash String?
+  ipAddress    String?
+  userAgent    String?
+  lastSeenAt   DateTime?
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([expiresAt])
+}
+
+model Load {
+  id                String         @id @default(cuid())
+  shipperUserId     String
+  pickupAddress     String
+  dropAddress       String
+  pickupCity        String
+  dropCity          String
+  materialType      String
+  weightTons        Float
+  quotedPrice       Decimal        @db.Decimal(12, 2)
+  status            LoadStatus     @default(OPEN)
+  scheduledPickupAt DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  shipper           User           @relation("ShipperLoads", fields: [shipperUserId], references: [id], onDelete: Cascade)
+  trips             Trip[]
+  paymentOrders     PaymentOrder[]
+
+  @@index([shipperUserId, status])
+  @@index([pickupCity, dropCity, status])
+  @@index([scheduledPickupAt, status])
+}
+
+model Trip {
+  id             String             @id @default(cuid())
+  loadId         String             @unique
+  driverUserId   String
+  currentStatus  TripStatus         @default(ASSIGNED)
+  vehicleNumber  String
+  etaHours       Int?
+  currentLat     Float?
+  currentLng     Float?
+  startedAt      DateTime?
+  endedAt        DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  load           Load               @relation(fields: [loadId], references: [id], onDelete: Cascade)
+  driver         User               @relation("DriverTrips", fields: [driverUserId], references: [id], onDelete: Cascade)
+  locationPings  TripLocationPing[]
+  fraudSignals   FraudSignal[]
+
+  @@index([driverUserId, currentStatus])
+  @@index([loadId, currentStatus])
+  @@index([currentLat, currentLng])
+  @@index([updatedAt, currentStatus])
+}
+
+model TripLocationPing {
+  id         String   @id @default(cuid())
+  tripId      String
+  lat         Float
+  lng         Float
+  speed       Float?
+  heading     Float?
+  accuracyM   Float?
+  createdAt   DateTime @default(now())
+  trip        Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId, createdAt])
+  @@index([lat, lng])
+}
+
+model BankAccount {
+  id                  String   @id @default(cuid())
+  userId              String
+  accountHolderName   String
+  accountNumberMasked String
+  ifscCode            String
+  upiId               String?
+  isVerified          Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isVerified])
+}
+
+model RefreshToken {
+  id           String             @id @default(cuid())
+  userId        String
+  tokenHash     String             @unique
+  sessionId     String
+  status        RefreshTokenStatus @default(ACTIVE)
+  expiresAt     DateTime
+  lastUsedAt    DateTime?
+  replacedById  String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([userId, sessionId, status])
+  @@index([expiresAt])
+}
+
+model OtpRequest {
+  id             String   @id @default(cuid())
+  mobile         String
+  action         String
+  attempts       Int      @default(0)
+  verifiedCount  Int      @default(0)
+  blockedUntil   DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([mobile, action])
+  @@index([mobile, blockedUntil])
+}
+
+model PaymentOrder {
+  id                 String             @id @default(cuid())
+  loadId             String?
+  createdByUserId    String
+  razorpayOrderId    String             @unique
+  razorpayPaymentId  String?
+  amountInPaise      Int
+  currency           String             @default("INR")
+  receipt            String
+  status             PaymentOrderStatus @default(CREATED)
+  notesJson          Json?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  load               Load?              @relation(fields: [loadId], references: [id], onDelete: SetNull)
+  createdBy          User               @relation("PaymentOrderCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  webhookEvents      PaymentWebhookEvent[]
+
+  @@index([createdByUserId, status])
+  @@index([loadId, status])
+  @@index([updatedAt, status])
+}
+
+model PaymentWebhookEvent {
+  id             String   @id @default(cuid())
+  paymentOrderId String?
+  razorpayOrderId String?
+  eventName      String
+  payloadJson    Json
+  signature      String
+  receivedAt     DateTime @default(now())
+  processedAt    DateTime?
+  paymentOrder   PaymentOrder? @relation(fields: [paymentOrderId], references: [id], onDelete: SetNull)
+
+  @@index([razorpayOrderId, receivedAt])
+  @@index([eventName, receivedAt])
+}
+
+model WalletLedger {
+  id             String                @id @default(cuid())
+  userId         String
+  direction      WalletLedgerDirection
+  amountInPaise  Int
+  category       String
+  referenceId    String?
+  referenceType  String?
+  notes          String?
+  createdAt      DateTime              @default(now())
+  user           User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([category, createdAt])
+}
+
+model Settlement {
+  id              String   @id @default(cuid())
+  userId          String
+  amountInPaise   Int
+  bankAccountId   String
+  status          String   @default("REQUESTED")
+  reference       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+}
+
+model AppJob {
+  id          String   @id @default(cuid())
+  name        String
+  payloadJson Json
+  status      String   @default("QUEUED")
+  attempts    Int      @default(0)
+  availableAt DateTime @default(now())
+  lockedAt    DateTime?
+  processedAt DateTime?
+  failedAt    DateTime?
+  lastError   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status, availableAt, createdAt])
+  @@index([name, status])
+}
+
+model FraudSignal {
+  id            String         @id @default(cuid())
+  userId         String?
+  tripId         String?
+  signalType     String
+  severity       FraudSeverity @default(LOW)
+  score          Int
+  reason         String
+  createdAt      DateTime      @default(now())
+  user           User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  trip           Trip?         @relation(fields: [tripId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([tripId, createdAt])
+  @@index([severity, score])
+}
