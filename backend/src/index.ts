@@ -15,6 +15,9 @@ async function main() {
 }
 
 main().catch((error) => {
-  logger.error({ error }, 'Backend failed to start');
+  const message = error instanceof Error ? error.message : String(error);
+  const stack = error instanceof Error ? error.stack : undefined;
+  console.error('Backend failed to start:', message);
+  console.error('Stack:', stack);
   process.exit(1);
 });
