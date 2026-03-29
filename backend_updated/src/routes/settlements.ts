@@ -76,7 +76,13 @@ router.patch('/:id/status', requireRole('ADMIN'), validateParams(settlementIdPar
 
   const existingLedger = await prisma.walletLedger.findFirst({ where: { referenceId: current.id, category: 'SETTLEMENT_PAID' } });
   if (body.status === 'PAID' && existingLedger) throw new AppError(409, 'Settlement payout already debited from wallet', 'SETTLEMENT_ALREADY_DEBITED');
+// Add after: import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 
+// Change line 79:
+async (tx) => {
+// To:
+async (tx: Prisma.TransactionClient) => {
   const item = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const updatedSettlement = await tx.settlement.update({ where: { id: params.id }, data: { status: body.status, reference: body.reference?.trim() || null } });
 
